@@ -13,7 +13,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.idt.geolocation.model.Geolocation;
 import net.idt.geolocation.repository.GeolocationRepository;
@@ -27,8 +26,7 @@ public class GeolocationController {
   @GET
   @Path("/{ip}")
   @Produces("application/json")
-  public Geolocation getGeolocation(@PathParam("ip") String ip)
-      throws JsonMappingException, JsonProcessingException {
+  public Geolocation getGeolocation(@PathParam("ip") String ip) {
     URL ipapi = null;
     try {
       ipapi = new URL("https://ipapi.co/" + ip + "/json/");
@@ -51,10 +49,17 @@ public class GeolocationController {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    Geolocation geolocation = new ObjectMapper().readValue(location, Geolocation.class);
+    Geolocation geolocation = null;
+    try {
+      geolocation = new ObjectMapper().readValue(location, Geolocation.class);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
     geolocation.setTimestamp(new Date().getTime());
     goelocationRepository.save(geolocation);
     return geolocation;
   }
+
+
 
 }
