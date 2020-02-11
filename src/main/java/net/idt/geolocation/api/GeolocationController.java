@@ -27,7 +27,7 @@ public class GeolocationController {
   @GET
   @Path("/{ip}")
   @Produces("application/json")
-  public Geolocation getAllUsers(@PathParam("ip") String ip)
+  public Geolocation getGeolocation(@PathParam("ip") String ip)
       throws JsonMappingException, JsonProcessingException {
     URL ipapi = null;
     try {
