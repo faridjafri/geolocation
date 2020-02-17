@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+	crossorigin="anonymous">
+<link
+	href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"
+	rel="stylesheet">
+
+</head>
+<body>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
+	<script
+		src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+
+
+	<script type="text/javascript">
+		$(function() {
+			$("#searchSubmit")
+					.click(
+							function(e) {
+								var ipAddress = $("#ipAddress").val();
+								const Http = new XMLHttpRequest();
+								const url='http://localhost:8080/geolocation/'+ipAddress;
+								Http.open("GET", url);
+								Http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+								Http.send();
+								Http.onreadystatechange = (e) => {
+									if(Http.readyState == 4){
+										  $(function () {
+												$('#tableSingleData').bootstrapTable({data: JSON.parse(Http.responseText)});
+											});
+									}
+								}
+								if (e.which == 13) {
+									e.preventDefault();
+								}
+							});
+			$("#ipAddress")
+					.on(
+							"keyup",
+							function(e) {
+								var str = $("#ipAddress").val();
+								if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+										.test(str)) {
+									$("#errorMessage").hide();
+									$('#searchSubmit').attr("disabled", false);
+								} else {
+									$("#errorMessage").show();
+									$("#searchSubmit").attr("disabled", true);
+								}
+								if (e.which == 13) {
+									e.preventDefault();
+									if(!$("searchSubmit").attr("disabled")){
+										$("#searchSubmit").click(e);
+									}
+								}
+							});
+			$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+				  var target = $(e.target).attr("href") // activated tab
+				  const Http = new XMLHttpRequest();
+					const url='http://localhost:8080/geolocation/history';
+					Http.open("GET", url);
+					Http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+					Http.send();
+					Http.onreadystatechange = (e) => {
+						if(Http.readyState == 4){
+							  $(function () {
+								  $('#tableHistory').bootstrapTable({
+								        data: JSON.parse(Http.responseText)
+								    });
+							  });
+						}
+					}
+			});
+		});
+	</script>
+
+	<div class="container">
+		<ul class="nav nav-tabs">
+			<li class="nav-item"><a data-toggle="tab" class="nav-link"
+				href="#findlocation">Find Geolocation</a></li>
+			<li class="nav-item"><a data-toggle="tab" class="nav-link"
+				href="#findHistory">History</a></li>
+		</ul>
+
+		<div class="tab-content">
+			<div id="findlocation" class="tab-pane fade active">
+				<form role="form" id="geolocationFinder">
+					<div class="row">
+						<div class="form-group col-lg-5">
+							<label for="code">IP Address</label> <input id="ipAddress"
+								type="text" class="form-control" />
+						</div>
+						<div id="errorMessage"
+							class="alert alert-danger alert-dismissible"
+							style="display: none;" role="alert">
+							This is an invalid IP address!
+							<button type="button" class="close" data-dismiss="alert"
+								aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+					</div>
+					<div class="form-group col-lg-2">
+						<div class="row">
+							<button id="searchSubmit" type="button" class="btn btn-primary"
+								disabled>Submit</button>
+						</div>
+					</div>
+				</form>
+				<table id="tableSingleData">
+					<thead>
+						<tr>
+							<th data-field="ip">IP Address</th>
+							<th data-field="city">City</th>
+							<th data-field="region">Region</th>
+							<th data-field="country_name">Country</th>
+							<th data-field="postal">Postal</th>
+							<th data-field="latitude">Latitude</th>
+							<th data-field="longitude">Longitude</th>
+							<th data-field="timezone">Timezone</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div id="findHistory" class="tab-pane fade">
+				<table id="tableHistory">
+					<thead>
+						<tr>
+							<th data-field="ip">IP Address</th>
+							<th data-field="city">City</th>
+							<th data-field="region">Region</th>
+							<th data-field="country_name">Country</th>
+							<th data-field="postal">Postal</th>
+							<th data-field="latitude">Latitude</th>
+							<th data-field="longitude">Longitude</th>
+							<th data-field="timezone">Timezone</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

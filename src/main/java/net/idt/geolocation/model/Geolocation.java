@@ -1,5 +1,6 @@
 package net.idt.geolocation.model;
 
+import java.util.Date;
 import org.springframework.data.annotation.Id;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -16,7 +17,7 @@ public class Geolocation {
   private String latitude;
   private String longitude;
   private String timezone;
-  private Long timestamp;
+  private Date timestamp;
 
   public String getIp() {
     return ip;
@@ -50,13 +51,12 @@ public class Geolocation {
     return timezone;
   }
 
-  public Long getTimestamp() {
+  public Date getTimestamp() {
     return timestamp;
   }
 
-  public void setTimestamp(Long timestamp) {
+  public void setTimestamp(Date timestamp) {
     this.timestamp = timestamp;
   }
-
 
 }
