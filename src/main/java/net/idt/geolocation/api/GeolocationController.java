@@ -17,9 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import com.mongodb.BasicDBObject;
 import net.idt.geolocation.model.Geolocation;
 import net.idt.geolocation.repository.GeolocationRepository;
 
@@ -110,18 +106,10 @@ public class GeolocationController {
       @RequestParam(value = "end", required = false) String end,
       @RequestParam(value = "n", required = false) String previousNLocations)
       throws JsonProcessingException {
-    List<String> distinctIps = null;
-    PageRequest request = null;
-    distinctIps =
+    List<String> distinctIps =
         Lists.newArrayList(mongoTemplate.getCollection("geolocation").distinct("ip", String.class));
-    TypedAggregation<Geolocation> studentAggregation = Aggregation.newAggregation(Geolocation.class,
-        Aggregation.group("ip").push(
-            new BasicDBObject("_id", "$_id").append("ip", "$ip").append("timestamp", "$timestamp"))
-            .as("geolocations"));
-    AggregationResults<Geolocation> results =
-        mongoTemplate.aggregate(studentAggregation, Geolocation.class);
-    List<Geolocation> studentResultsList = results.getMappedResults();
-    request = PageRequest.of(1, Integer.valueOf(10), Sort.by(Sort.Direction.DESC, "timestamp"));
+    PageRequest request = PageRequest.of(1, Integer.valueOf(previousNLocations),
+        Sort.by(Sort.Direction.DESC, "timestamp"));
     if (StringUtils.isAnyBlank(start, end)) {
       return geolocationRepository.findFirstDistinctByIpIn(distinctIps, request);
     }
@@ -135,7 +123,7 @@ public class GeolocationController {
     } catch (ParseException e) {
       e.printStackTrace();
     }
-    return geolocationRepository.findByTimestampBetween(startDate, endDate);
+    return geolocationRepository.findByTimestampBetween(startDate, endDate, request);
   }
 
 }

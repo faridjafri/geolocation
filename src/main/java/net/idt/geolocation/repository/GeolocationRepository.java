@@ -10,7 +10,7 @@ public interface GeolocationRepository extends MongoRepository<Geolocation, Stri
 
   List<Geolocation> findByIp(String ip);
 
-  List<Geolocation> findByTimestampBetween(Date startDate, Date endDate);
+  List<Geolocation> findByTimestampBetween(Date startDate, Date endDate, Pageable pageable);
 
   List<Geolocation> findByIpAndTimestampBetween(String ip, Date startDate, Date endDate);
 
