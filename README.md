@@ -17,4 +17,4 @@ Hitting enter refreshes the page.
 Exceptions yet to be handled on the backend to throw proper UI errors.
 Error handling for top N locations yet to be handled.
 
-Overall, it took a lot of time integrating backend with UI. I intend to finish this after evaluation.
+Overall, it looks like a lousy application because it took a lot of time integrating backend with UI and I missed small details along the way. I intend to finish this after evaluation.
