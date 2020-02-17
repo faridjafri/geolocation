@@ -14,10 +14,4 @@ public class GreetingController {
   public String greeting(Model model) {
     return "greeting";
   }
-
-  @ResponseBody
-  @RequestMapping(value = "/greeting1", method = RequestMethod.GET)
-  public String greeting1() {
-    return "asdjfadskf";
-  }
 }
