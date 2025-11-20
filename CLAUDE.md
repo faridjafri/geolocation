@@ -38,7 +38,14 @@ geolocation/
 │       └── Geolocation.postman_collection.json  # API test collection
 ├── src/test/java/net/idt/geolocation/
 │   └── GeolocationApplicationTests.java     # Basic context load test
+├── docs/packages/                           # Package-specific development guides
+│   ├── API-CONTROLLERS.md                   # Guide for API controller development
+│   ├── MODEL.md                             # Guide for model/entity development
+│   ├── REPOSITORY.md                        # Guide for repository development
+│   ├── FRONTEND.md                          # Guide for UI/frontend development
+│   └── TESTING.md                           # Comprehensive testing guide
 ├── pom.xml                                  # Maven build configuration
+├── CLAUDE.md                                # AI assistant guide (this file)
 └── README.md                                # User-facing documentation
 ```
 
@@ -258,45 +265,97 @@ Located in `GeolocationRepository.java`:
 
 ---
 
-## Common Development Tasks
+## Package-Specific Development Guides
 
-### Adding a New API Endpoint
-1. Add method to `GeolocationController.java`
-2. Use `@RequestMapping` annotation with path and method
-3. Inject dependencies via `@Autowired` if needed
-4. Add corresponding repository method if database access required
-5. Test with Postman collection in `src/main/resources/postman/`
+For detailed instructions on working with specific parts of the codebase, see the package-specific guides in `docs/packages/`:
 
-### Modifying the Data Model
-1. Update `Geolocation.java` with new fields
-2. Add getters/setters (no Lombok in this project)
-3. Update `GeolocationRepository.java` if new query methods needed
-4. **Remember:** Uses `@JsonIgnoreProperties(ignoreUnknown = true)` so extra API fields are ignored
+### 📦 API Controllers Package (`net.idt.geolocation.api`)
+**Guide:** [`docs/packages/API-CONTROLLERS.md`](docs/packages/API-CONTROLLERS.md)
 
-### Fixing the UI Refresh Issue
-**Location:** `src/main/resources/templates/greeting.html`
+**When to read this:**
+- Adding new REST API endpoints
+- Modifying existing API endpoints
+- Adding exception handling to controllers
+- Replacing URLConnection with RestTemplate
+- Creating a service layer
+- Adding request validation
 
-The issue is in the AJAX success callback - the table is not being updated with new data. Look for:
-```javascript
-success: function(result) {
-    // Table refresh logic needs fixing here
-}
-```
+**Key topics covered:**
+- API endpoint patterns and conventions
+- Request/response handling
+- Exception handling with @ControllerAdvice
+- Logging best practices
+- Service layer extraction
 
-### Adding Exception Handling
-**Priority Fix Areas:**
-1. `GeolocationController.getGeolocation()` - Wrap ipapi.co calls in try-catch
-2. Create custom exception classes in new `exception` package
-3. Add `@ControllerAdvice` for global exception handling
-4. Return proper HTTP status codes (400, 404, 500, etc.)
-5. Create error response DTOs
+### 📊 Model Package (`net.idt.geolocation.model`)
+**Guide:** [`docs/packages/MODEL.md`](docs/packages/MODEL.md)
 
-### Improving Tests
-1. Add JUnit 5 tests in `src/test/java/net/idt/geolocation/`
-2. Mock `GeolocationRepository` with Mockito
-3. Use `MockMvc` for controller tests
-4. Consider using WireMock to mock ipapi.co API
-5. Add `@DataMongoTest` for repository tests
+**When to read this:**
+- Adding new data models
+- Modifying existing model fields
+- Adding validation annotations
+- Working with MongoDB indexes
+- Understanding field naming conventions
+
+**Key topics covered:**
+- Field naming (snake_case vs camelCase)
+- MongoDB annotations (@Id, @Document)
+- Jackson annotations (@JsonIgnoreProperties)
+- Model validation
+- Best practices for POJOs
+
+### 🗄️ Repository Package (`net.idt.geolocation.repository`)
+**Guide:** [`docs/packages/REPOSITORY.md`](docs/packages/REPOSITORY.md)
+
+**When to read this:**
+- Adding custom query methods
+- Working with MongoDB queries
+- Using pagination and sorting
+- Creating complex queries with @Query
+- Using MongoTemplate for dynamic queries
+
+**Key topics covered:**
+- Spring Data query method naming
+- Custom @Query annotations
+- Pagination with Pageable
+- MongoTemplate for complex operations
+- Repository testing with @DataMongoTest
+
+### 🎨 Frontend/UI (`src/main/resources/templates/`)
+**Guide:** [`docs/packages/FRONTEND.md`](docs/packages/FRONTEND.md)
+
+**When to read this:**
+- Fixing the UI refresh issue (CRITICAL)
+- Modifying Thymeleaf templates
+- Adding new UI features
+- Working with Bootstrap Table
+- Handling AJAX calls and errors
+
+**Key topics covered:**
+- Fixing the table refresh bug
+- Bootstrap Table methods
+- AJAX patterns with jQuery
+- Input validation
+- Date format handling (MM.dd.yyyy)
+- Loading indicators and error messages
+
+### 🧪 Testing (`src/test/java/`)
+**Guide:** [`docs/packages/TESTING.md`](docs/packages/TESTING.md)
+
+**When to read this:**
+- Writing unit tests
+- Writing integration tests
+- Testing controllers with MockMvc
+- Testing repositories with @DataMongoTest
+- Mocking external API calls
+- Setting up test coverage
+
+**Key topics covered:**
+- Unit testing patterns
+- Integration testing with @SpringBootTest
+- Mocking with Mockito and WireMock
+- Test coverage with JaCoCo
+- CI/CD integration
 
 ---
 
@@ -378,34 +437,43 @@ spring.application.name=Bootstrap Spring Boot
 
 ### When Working on This Project
 
-1. **Always Check Known Issues First**
+1. **ALWAYS Check Package-Specific Guides First**
+   - **Before modifying any code**, check the relevant package guide:
+     - Working on controllers? → Read `docs/packages/API-CONTROLLERS.md`
+     - Working on models? → Read `docs/packages/MODEL.md`
+     - Working on repositories? → Read `docs/packages/REPOSITORY.md`
+     - Working on UI? → Read `docs/packages/FRONTEND.md`
+     - Writing tests? → Read `docs/packages/TESTING.md`
+   - These guides contain detailed, package-specific conventions and examples
+
+2. **Always Check Known Issues First**
    - Review the "Known Issues" section before starting work
    - The original developer noted this is incomplete
    - Focus on high-priority fixes if improving existing code
 
-2. **Follow Existing Patterns**
+3. **Follow Existing Patterns**
    - No service layer exists (controllers call repositories directly)
    - No Lombok (use standard getters/setters)
    - Uses Guava and Commons Lang3 for utilities
 
-3. **Database Considerations**
+4. **Database Considerations**
    - MongoDB must be running locally
    - No authentication configured
    - Collection name is `geolocation` (hardcoded in controller)
 
-4. **Testing New Changes**
+5. **Testing New Changes**
    - Start MongoDB first: `mongod`
    - Build with: `mvn clean install`
    - Run with: `java -jar target/geolocation-0.0.1-SNAPSHOT.jar`
    - Test UI at: `http://localhost:8080/app/greeting`
    - Test API with Postman collection
 
-5. **Date Format Critical Detail**
+6. **Date Format Critical Detail**
    - **Always use `MM.dd.yyyy` format** (periods, not slashes!)
    - SimpleDateFormat pattern hardcoded in controller
    - Changing this requires updating both backend and frontend
 
-6. **Code Quality Improvements Needed**
+7. **Code Quality Improvements Needed**
    - Add proper exception handling (currently just printStackTrace)
    - Extract service layer from controllers
    - Add input validation
@@ -413,7 +481,7 @@ spring.application.name=Bootstrap Spring Boot
    - Replace URLConnection with RestTemplate or WebClient
    - Add logging (SLF4J/Logback)
 
-7. **Security Considerations**
+8. **Security Considerations**
    - No authentication/authorization implemented
    - No rate limiting for external API calls
    - No input sanitization (potential injection risks)
@@ -423,14 +491,16 @@ spring.application.name=Bootstrap Spring Boot
 
 If asked to improve this codebase, prioritize:
 
-1. **Fix UI refresh issue** (greeting.html JavaScript)
-2. **Add proper exception handling** (create @ControllerAdvice)
-3. **Add service layer** (separate business logic from controllers)
-4. **Add comprehensive tests** (unit + integration)
-5. **Replace URLConnection** with RestTemplate
-6. **Add request validation** (@Valid annotations + Bean Validation)
-7. **Add logging** (replace printStackTrace with proper logging)
-8. **Implement error responses** (standardized error DTOs)
+1. **Fix UI refresh issue** - See `docs/packages/FRONTEND.md` for detailed fix
+2. **Add proper exception handling** - See `docs/packages/API-CONTROLLERS.md` for @ControllerAdvice setup
+3. **Add service layer** - See `docs/packages/API-CONTROLLERS.md` for service layer extraction
+4. **Add comprehensive tests** - See `docs/packages/TESTING.md` for complete testing guide
+5. **Replace URLConnection** - See `docs/packages/API-CONTROLLERS.md` for RestTemplate migration
+6. **Add request validation** - See `docs/packages/API-CONTROLLERS.md` and `docs/packages/MODEL.md`
+7. **Add logging** - See `docs/packages/API-CONTROLLERS.md` for SLF4J setup
+8. **Implement error responses** - See `docs/packages/API-CONTROLLERS.md` for error DTOs
+
+**Note:** Each improvement has detailed implementation examples in the referenced guides.
 
 ### What NOT to Change Without Asking
 
